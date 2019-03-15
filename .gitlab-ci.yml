@@ -46,5 +46,5 @@ test:jdk8:
   # Use stage test here, so the pages job may later pickup the created site.
   stage: test
   script:
-    - './mvnn $MAVEN_CLI_OPTS test'
+    - './mvnw $MAVEN_CLI_OPTS test'
   image: openjdk:8-alpine
