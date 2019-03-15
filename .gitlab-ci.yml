@@ -50,12 +50,12 @@ cache:
 # Validate merge requests using JDK8
 build:jdk8:
   <<: *validate
-  image: busybox:latest
+  image: openjdk:8-alpine
 
 # Verify merge requests using JDK8
 test:jdk8:
   <<: *verify
-  image: busybox:latest
+  image: openjdk:8-alpine
 
 
 # For `master` branch run `mvn deploy` automatically.
