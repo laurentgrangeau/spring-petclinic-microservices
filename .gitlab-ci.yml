@@ -30,33 +30,12 @@ cache:
   paths:
     - .m2/repository
 
-# This will only validate and compile stuff and run e.g. maven-enforcer-plugin.
-# Because some enforcer rules might check dependency convergence and class duplications
-# we use `test-compile` here instead of `validate`, so the correct classpath is picked up.
-.validate: &validate
+# Validate merge requests using JDK8
+build:jdk8:
   stage: build
   script:
     - './mvnw $MAVEN_CLI_OPTS compile'
-
-# For merge requests do not `deploy` but only run `verify`.
-# See https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
-.verify: &verify
-  stage: test
-  script:
-    - 'mvnw $MAVEN_CLI_OPTS test'
-  except:
-    - master
-
-# Validate merge requests using JDK8
-build:jdk8:
-  <<: *validate
   image: openjdk:8-alpine
-
-# Verify merge requests using JDK8
-test:jdk8:
-  <<: *verify
-  image: openjdk:8-alpine
-
 
 # For `master` branch run `mvn deploy` automatically.
 # Here you need to decide whether you want to use JDK7 or 8.
@@ -68,26 +47,4 @@ test:jdk8:
   stage: test
   script:
     - './mvnn $MAVEN_CLI_OPTS test'
-  only:
-    - master
-  # Archive up the built documentation site.
-  artifacts:
-    paths:
-    - target/staging
-  image: maven:3.3.9-jdk-8
-
-
-pages:
-  image: busybox:latest
-  stage: deploy
-  script:
-    # Because Maven appends the artifactId automatically to the staging path if you did define a parent pom,
-    # you might need to use `mv target/staging/YOUR_ARTIFACT_ID public` instead.
-    - mv target/staging public
-  dependencies:
-    - deploy:jdk8
-  artifacts:
-    paths:
-    - public
-  only:
-    - master
+  image: openjdk:8-alpine
