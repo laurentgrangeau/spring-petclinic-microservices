@@ -10,9 +10,7 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
   DOCKER_REGISTRY: $CI_REGISTRY_IMAGE
-
-before_script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  DOCKER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
 cache:
   paths:
@@ -40,12 +38,15 @@ code_quality:
   services:
     - docker:stable-dind
   script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
     - docker run
         --env SOURCE_CODE="$PWD"
         --volume "$PWD":/code
         --volume /var/run/docker.sock:/var/run/docker.sock
         "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+    - docker build -t $DOCKER_IMAGE -f Dockerfile.build .
+    - docker push $DOCKER_IMAGE
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
@@ -53,5 +54,6 @@ code_quality:
 package:
   stage: package
   script:
+
     - './mvnw $MAVEN_CLI_OPTS package -PbuildDocker -DpushImage'
   image: openjdk:8-alpine
