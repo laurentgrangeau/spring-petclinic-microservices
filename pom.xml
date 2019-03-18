@@ -172,7 +172,7 @@
                                 </execution>
                             </executions>
                             <configuration>
-                                <imageName>${env.DOCKER_REGISTRY}/${docker.image.prefix}/${project.artifactId}:${project.version}</imageName>
+                                <imageName>${env.DOCKER_REGISTRY}/${project.artifactId}:${project.version}</imageName>
                                 <dockerDirectory>${docker.image.dockerfile.dir}</dockerDirectory>
                                 <resources>
                                     <resource>

@@ -10,7 +10,7 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
   DOCKER_REGISTRY: $CI_REGISTRY_IMAGE
-  DOCKER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  DOCKER_IMAGE: $CI_REGISTRY_IMAGE/openjdk-dind:$CI_COMMIT_REF_SLUG
 
 cache:
   paths:
@@ -54,6 +54,5 @@ code_quality:
 package:
   stage: package
   script:
-
     - './mvnw $MAVEN_CLI_OPTS package -PbuildDocker -DpushImage'
-  image: openjdk:8-alpine
+  image: $DOCKER_IMAGE
