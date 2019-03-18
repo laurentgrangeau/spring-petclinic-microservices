@@ -50,6 +50,7 @@ test:jdk8:
   image: openjdk:8-alpine
 
 code_quality:
+  stage: quality
   image: docker:stable
   variables:
     DOCKER_DRIVER: overlay2
@@ -66,5 +67,3 @@ code_quality:
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
-  dependencies:
-    - test:jdk8
