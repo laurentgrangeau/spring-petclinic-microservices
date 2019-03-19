@@ -8,8 +8,7 @@ variables:
   MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
   DOCKER_DRIVER: overlay2
-  DOCKER_REGISTRY: $CI_REGISTRY_IMAGE
-  DOCKER_IMAGE: $CI_REGISTRY_IMAGE/openjdk-dind:$CI_COMMIT_SHORT_SHA
+  DOCKER_HOST: tcp://docker:2375
 
 cache:
   paths:
@@ -31,9 +30,6 @@ test:jdk8:
 code_quality:
   stage: quality
   image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
-    DOCKER_HOST: tcp://docker:2375
   allow_failure: true
   services:
     - docker:stable-dind
@@ -45,16 +41,14 @@ code_quality:
 #        --volume "$PWD":/code
 #        --volume /var/run/docker.sock:/var/run/docker.sock
 #        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
-    - docker build -t $DOCKER_IMAGE -f Dockerfile.build .
-    - docker push $DOCKER_IMAGE
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
 
 package:
   stage: package
-  variables:
-    DOCKER_HOST: unix://var/run/docker.sock
+  services:
+    - docker:stable-dind
   script:
-    - './mvnw $MAVEN_CLI_OPTS install -PbuildDocker -DpushImage'
-  image: $DOCKER_IMAGE
+    - './mvnw $MAVEN_CLI_OPTS install -PbuildDocker -DskipTests=true -DpushImage'
+  image: openjdk:8-alpine
