@@ -50,6 +50,7 @@ package:
   services:
     - docker:stable-dind
   script:
+    - apk add --no-cache docker
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - './mvnw $MAVEN_CLI_OPTS install -PbuildDocker -DskipTests=true -DpushImage'
   image: openjdk:8-alpine
