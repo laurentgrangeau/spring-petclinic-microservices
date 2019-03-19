@@ -18,7 +18,7 @@ public class HystrixDashboardApplication {
         SpringApplication.run(HystrixDashboardApplication.class, args);
     }
 
-    @RequestMapping("/")
+    @RequestMapping("/", method = GET)
     public String home() {
         return "forward:/hystrix";
     }
