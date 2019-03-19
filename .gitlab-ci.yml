@@ -54,5 +54,5 @@ code_quality:
 package:
   stage: package
   script:
-    - './mvnw $MAVEN_CLI_OPTS clean install -PbuildDocker -DpushImage'
+    - './mvnw $MAVEN_CLI_OPTS install -PbuildDocker -DpushImage'
   image: $DOCKER_IMAGE
