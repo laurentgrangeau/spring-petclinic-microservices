@@ -41,6 +41,7 @@ public class VisitsServiceClient {
 
     private final RestTemplate loadBalancedRestTemplate;
 
+    @HystrixCommand(fallbackMethod = "emptyVisitsForPets")
     public Map<Integer, List<VisitDetails>> getVisitsForPets(final List<Integer> petIds) {
         UriComponentsBuilder builder = fromHttpUrl("http://visits-service/pets/visits")
             .queryParam("petId", joinIds(petIds));
@@ -53,5 +54,9 @@ public class VisitsServiceClient {
 
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
+    }
+
+    private Map<Integer, List<VisitDetails>> emptyVisitsForPets(List<Integer> petIds) {
+        return Collections.emptyMap();
     }
 }
