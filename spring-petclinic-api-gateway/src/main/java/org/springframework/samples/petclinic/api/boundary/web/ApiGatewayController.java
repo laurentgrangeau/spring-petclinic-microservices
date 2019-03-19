@@ -37,7 +37,7 @@ import static java.util.Collections.emptyList;
 @RequiredArgsConstructor
 public class ApiGatewayController {
 
-    private final CustomersServiceClient customersServiceClient = new CustomersServiceClient();
+    private final CustomersServiceClient customersServiceClient;
 
     private final VisitsServiceClient visitsServiceClient;
 
