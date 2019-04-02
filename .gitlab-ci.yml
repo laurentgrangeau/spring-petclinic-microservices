@@ -62,7 +62,7 @@ deploy_staging:
   image: docker:stable
   script:
     - apk add --no-cache openssh-client
-    - ssh -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com
+    - ssh-keygen
     - scp -r docker -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com:/root
     - scp docker-compose.yml -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com:/root
     - ssh $PLAYWD@direct.labs.play-with-docker.com "docker-compose up -d"
