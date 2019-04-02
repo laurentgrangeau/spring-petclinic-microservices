@@ -65,10 +65,10 @@ deploy_staging:
     - ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
     - eval "$(ssh-agent -s)"
     - ssh-add /tmp/sshkey
-    - ssh -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com
+    - ssh -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com "id"
     - scp -r docker -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com:/root
     - scp docker-compose.yml -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com:/root
-    - ssh $PLAYWD@direct.labs.play-with-docker.com "docker-compose up -d"
+    - ssh -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com "docker-compose up -d"
   environment:
     name: staging
     url: http://$PLAYWD-8080.direct.labs.play-with-docker.com
