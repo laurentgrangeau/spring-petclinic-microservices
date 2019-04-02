@@ -64,7 +64,7 @@ deploy_staging:
     - apk add --no-cache openssh-client
     - ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
     - eval "$(ssh-agent -s)"
-    - ssh-add <(cat ~/.ssh/id_rsa)
+    - ssh-add ~/.ssh/id_rsa
     - ssh -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com
     - scp -r docker -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com:/root
     - scp docker-compose.yml -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com:/root
