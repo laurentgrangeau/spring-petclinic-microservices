@@ -11,7 +11,7 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375
   DOCKER_REGISTRY: $CI_REGISTRY_IMAGE
-  PWD: ip172-18-0-26-bihs8grrjlp000edv4ag
+  PLAYWD: ip172-18-0-26-bihs8grrjlp000edv4ag
 
 cache:
   paths:
@@ -62,10 +62,10 @@ deploy_staging:
   image: docker:stable
   script:
     - apk add --no-cache openssh-client
-    - ssh -o StrictHostKeyChecking=no $PWD@direct.labs.play-with-docker.com
-    - scp -r docker -o StrictHostKeyChecking=no $PWD@direct.labs.play-with-docker.com:/root
-    - scp docker-compose.yml -o StrictHostKeyChecking=no $PWD@direct.labs.play-with-docker.com:/root
-    - ssh $PWD@direct.labs.play-with-docker.com "docker-compose up -d"
+    - ssh -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com
+    - scp -r docker -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com:/root
+    - scp docker-compose.yml -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com:/root
+    - ssh $PLAYWD@direct.labs.play-with-docker.com "docker-compose up -d"
   environment:
     name: staging
-    url: http://$PWD-8080.direct.labs.play-with-docker.com
+    url: http://$PLAYWD-8080.direct.labs.play-with-docker.com
