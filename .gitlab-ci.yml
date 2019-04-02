@@ -3,7 +3,7 @@ stages:
   - test
   - quality
   - package
-  - deploy-staging
+  - deploy
 
 variables:
   MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
@@ -57,9 +57,12 @@ package:
     - './mvnw $MAVEN_CLI_OPTS install -PbuildDocker -DskipTests=true -DpushImage'
 
 deploy-staging:
-  stage: deploy-staging
+  stage: deploy
   image: docker:stable
   script:
     - scp -r docker ip172-18-0-51-bihm1906chi000b37l6g@direct.labs.play-with-docker.com:/root
     - scp docker-compose.yml ip172-18-0-51-bihm1906chi000b37l6g@direct.labs.play-with-docker.com:/root
     - ssh ip172-18-0-51-bihm1906chi000b37l6g@direct.labs.play-with-docker.com "docker-compose up -d"
+  environment:
+    name: staging
+    url: http://ip172-18-0-51-bihm1906chi000b37l6g-8080.direct.labs.play-with-docker.com
