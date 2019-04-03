@@ -38,11 +38,11 @@ code_quality:
     - docker:stable-dind
   script:
     - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
-#    - docker run
-#        --env SOURCE_CODE="$PWD"
-#        --volume "$PWD":/code
-#        --volume /var/run/docker.sock:/var/run/docker.sock
-#        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+    - docker run
+        --env SOURCE_CODE="$PWD"
+        --volume "$PWD":/code
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
@@ -54,8 +54,8 @@ package:
     - docker:stable-dind
   script:
     - apk add --no-cache docker
-#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-#    - './mvnw $MAVEN_CLI_OPTS install -PbuildDocker -DskipTests=true -DpushImage'
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - './mvnw $MAVEN_CLI_OPTS install -PbuildDocker -DskipTests=true -DpushImage'
 
 deploy_staging:
   stage: deploy
