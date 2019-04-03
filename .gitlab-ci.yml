@@ -92,3 +92,4 @@ deploy_prod:
   environment:
     name: prod
     url: http://$PLAYWD-8080.direct.labs.play-with-docker.com
+  when: manual
