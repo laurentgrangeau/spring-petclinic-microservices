@@ -11,7 +11,7 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375
   DOCKER_REGISTRY: $CI_REGISTRY_IMAGE
-  PLAYWD: ip172-18-0-26-bihs8grrjlp000edv4ag
+  PLAYWD: ip172-18-0-12-biiabu86chi000em9j9g
 
 cache:
   paths:
