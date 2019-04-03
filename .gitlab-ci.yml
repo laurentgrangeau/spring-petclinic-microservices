@@ -68,7 +68,7 @@ deploy_staging:
     - eval "$(ssh-agent -s)"
     - ssh-add /tmp/sshkey
 #    - ssh -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com "id"
-    - scp -o StrictHostKeyChecking=no -r docker $PLAYWD@direct.labs.play-with-docker.com:/root
+    - scp -o StrictHostKeyChecking=no -r docker $PLAYWD@direct.labs.play-with-docker.com:/root || exit 0
     - scp -o StrictHostKeyChecking=no docker-compose.yml $PLAYWD@direct.labs.play-with-docker.com:/root
     - ssh -o StrictHostKeyChecking=no $PLAYWD@direct.labs.play-with-docker.com "docker-compose up -d"
   environment:
