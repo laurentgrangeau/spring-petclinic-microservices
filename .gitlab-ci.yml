@@ -69,7 +69,7 @@ deploy_staging:
     - ssh-add /tmp/sshkey
     - scp -r docker $PLAYWD@direct.labs.play-with-docker.com:/root ||
       scp docker-compose.yml $PLAYWD@direct.labs.play-with-docker.com:/root ||
-      ssh -t $PLAYWD@direct.labs.play-with-docker.com "docker-compose up -d" ||
+      ssh -T $PLAYWD@direct.labs.play-with-docker.com "docker-compose up -d" ||
       exit 0
   environment:
     name: staging
