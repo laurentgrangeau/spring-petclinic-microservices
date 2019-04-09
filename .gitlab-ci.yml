@@ -1,95 +1,32 @@
 stages:
   - build
   - test
-  - quality
-  - package
-  - deploy
-
-variables:
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-  DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_REGISTRY: $CI_REGISTRY_IMAGE
-  PLAYWD: ip172-18-0-12-biiabu86chi000em9j9g
 
 cache:
   paths:
     - .m2/repository
   key: "$CI_JOB_NAME"
 
-build:
+build_job:
   stage: build
-  image: openjdk:8-alpine
   script:
-    - echo './mvnw $MAVEN_CLI_OPTS compile'
+    - ./mvnw compile
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
 
-test:
+test_job:
   stage: test
+  script:
+    - ./mvnw test
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
   image: openjdk:8-alpine
-  script:
-    - echo './mvnw $MAVEN_CLI_OPTS test'
-
-code_quality:
-  stage: quality
-  image: docker:stable
-  allow_failure: true
-  services:
-    - docker:stable-dind
-  script:
-    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
-    - docker run
-        --env SOURCE_CODE="$PWD"
-        --volume "$PWD":/code
-        --volume /var/run/docker.sock:/var/run/docker.sock
-        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
-  artifacts:
-    reports:
-      codequality: gl-code-quality-report.json
-
-package:
-  stage: package
-  image: openjdk:8-alpine
-  services:
-    - docker:stable-dind
-  script:
-    - apk add --no-cache docker
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - './mvnw $MAVEN_CLI_OPTS install -PbuildDocker -DskipTests=true -DpushImage'
-
-deploy_staging:
-  stage: deploy
-  image: docker:stable
-  script:
-    - apk add --no-cache openssh-client
-    - mkdir -p ~/.ssh
-    - ssh-keyscan -H direct.labs.play-with-docker.com >> ~/.ssh/known_hosts
-    - ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
-    - eval "$(ssh-agent -s)"
-    - ssh-add /tmp/sshkey
-    - scp -r docker $PLAYWD@direct.labs.play-with-docker.com:/root ||
-      scp docker-compose.yml $PLAYWD@direct.labs.play-with-docker.com:/root ||
-      ssh -T $PLAYWD@direct.labs.play-with-docker.com "docker stack deploy --compose-file docker-compose.yml petclinic" ||
-      exit 0
-  environment:
-    name: staging
-    url: http://$PLAYWD-8080.direct.labs.play-with-docker.com
-
-deploy_prod:
-  stage: deploy
-  image: docker:stable
-  script:
-    - apk add --no-cache openssh-client
-    - mkdir -p ~/.ssh
-    - ssh-keyscan -H direct.labs.play-with-docker.com >> ~/.ssh/known_hosts
-    - ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
-    - eval "$(ssh-agent -s)"
-    - ssh-add /tmp/sshkey
-    - scp -r docker $PLAYWD@direct.labs.play-with-docker.com:/root ||
-      scp docker-compose.yml $PLAYWD@direct.labs.play-with-docker.com:/root ||
-      ssh -T $PLAYWD@direct.labs.play-with-docker.com "docker stack deploy --compose-file docker-compose.yml petclinic" ||
-      exit 0
-  environment:
-    name: prod
-    url: http://$PLAYWD-8080.direct.labs.play-with-docker.com
-  when: manual
