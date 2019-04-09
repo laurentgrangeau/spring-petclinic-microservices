@@ -172,7 +172,7 @@
                                 </execution>
                             </executions>
                             <configuration>
-                                <imageName>${env.DOCKER_REGISTRY}/${project.artifactId}:${project.version}</imageName>
+                                <imageName>${env.$CI_REGISTRY_IMAGE}/${project.artifactId}:${project.version}</imageName>
                                 <dockerDirectory>${docker.image.dockerfile.dir}</dockerDirectory>
                                 <volumes>
                                     <volume>/var/run/docker.sock:/var/run/docker.sock</volume>
