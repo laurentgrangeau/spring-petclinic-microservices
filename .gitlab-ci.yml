@@ -15,49 +15,49 @@ cache:
 variables:
     PLAYWD: ip172-18-0-78-bivnednr8gag00f9js60
 
-# build_job:
-#   stage: build
-#   script:
-#     - ./mvnw compile
-#       -Dhttps.protocols=TLSv1.2
-#       -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-#       -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
-#       -Dorg.slf4j.simpleLogger.showDateTime=true
-#       -Djava.awt.headless=true
-#       --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
-#   image: openjdk:8-alpine
+build_job:
+  stage: build
+  script:
+    - ./mvnw compile
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
 
-# test_job:
-#   stage: test
-#   script:
-#     - ./mvnw test
-#       -Dhttps.protocols=TLSv1.2
-#       -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-#       -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
-#       -Dorg.slf4j.simpleLogger.showDateTime=true
-#       -Djava.awt.headless=true
-#       --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
-#   image: openjdk:8-alpine
+test_job:
+  stage: test
+  script:
+    - ./mvnw test
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
 
-# code_quality_job:
-#   stage: quality
-#   image: docker:stable
-#   allow_failure: true
-#   services:
-#     - docker:stable-dind
-#   script:
-#     - mkdir codequality-results
-#     - docker run
-#         --env CODECLIMATE_CODE="$PWD"
-#         --volume "$PWD":/code
-#         --volume /var/run/docker.sock:/var/run/docker.sock
-#         --volume /tmp/cc:/tmp/cc
-#         codeclimate/codeclimate analyze -f html > ./codequality-results/index.html
-#   artifacts:
-#     paths:
-#       - codequality-results/
-#     reports:
-#       codequality: gl-code-quality-report.json
+code_quality_job:
+  stage: quality
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - mkdir codequality-results
+    - docker run
+        --env CODECLIMATE_CODE="$PWD"
+        --volume "$PWD":/code
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        --volume /tmp/cc:/tmp/cc
+        codeclimate/codeclimate analyze -f html > ./codequality-results/index.html
+  artifacts:
+    paths:
+      - codequality-results/
+    reports:
+      codequality: gl-code-quality-report.json
 
 package_job:
   stage: package
