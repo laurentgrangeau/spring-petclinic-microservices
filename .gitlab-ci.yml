@@ -84,6 +84,7 @@ deploy_staging_job:
     - apk add --no-cache openssh-client py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
     - export DOCKER_HOST=tcp://$PLAYWD.direct.labs.play-with-docker.com:2375
+    - docker-compose down
     - docker-compose up -d
   environment:
     name: staging
@@ -116,6 +117,7 @@ canary_job:
     - apk add --no-cache openssh-client py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
     - export DOCKER_HOST=tcp://$PLAYWD.direct.labs.play-with-docker.com:2375
+    - docker-compose down
     - docker-compose up -d
   environment:
     name: prod
@@ -131,6 +133,7 @@ deploy_prod_job:
     - apk add --no-cache openssh-client py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
     - export DOCKER_HOST=tcp://$PLAYWD.direct.labs.play-with-docker.com:2375
+    - docker-compose down
     - docker-compose up -d
   environment:
     name: prod
