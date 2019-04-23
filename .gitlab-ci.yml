@@ -97,7 +97,7 @@ performance_job:
   services:
     - docker:stable-dind
   script:
-    - timeout 300 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$PLAYWD-8080.direct.labs.play-with-docker.com/)" != "200" ]]; do sleep 5; done' || false
+    - x=1; while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://$PLAYWD-8080.direct.labs.play-with-docker.com/)" != "200" ] || [ $x -le 60 ]]; do sleep 5; done || false
     - mkdir gitlab-exporter
     - wget -O ./gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/master/index.js
     - mkdir sitespeed-results
