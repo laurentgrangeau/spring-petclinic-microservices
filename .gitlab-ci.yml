@@ -3,6 +3,7 @@ stages:
   - test
   - quality
   - package
+  - canary
   - deploy
   - performance
 
@@ -14,67 +15,67 @@ cache:
 variables:
     PLAYWD: ip172-18-0-16-bivlvu7r8gag00f9jps0
 
-# build_job:
-#   stage: build
-#   script:
-#     - ./mvnw compile
-#       -Dhttps.protocols=TLSv1.2
-#       -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-#       -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
-#       -Dorg.slf4j.simpleLogger.showDateTime=true
-#       -Djava.awt.headless=true
-#       --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
-#   image: openjdk:8-alpine
+build_job:
+  stage: build
+  script:
+    - ./mvnw compile
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
 
-# test_job:
-#   stage: test
-#   script:
-#     - ./mvnw test
-#       -Dhttps.protocols=TLSv1.2
-#       -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-#       -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
-#       -Dorg.slf4j.simpleLogger.showDateTime=true
-#       -Djava.awt.headless=true
-#       --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
-#   image: openjdk:8-alpine
+test_job:
+  stage: test
+  script:
+    - ./mvnw test
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
 
-# code_quality_job:
-#   stage: quality
-#   image: docker:stable
-#   allow_failure: true
-#   services:
-#     - docker:stable-dind
-#   script:
-#     - mkdir codequality-results
-#     - docker run
-#         --env CODECLIMATE_CODE="$PWD"
-#         --volume "$PWD":/code
-#         --volume /var/run/docker.sock:/var/run/docker.sock
-#         --volume /tmp/cc:/tmp/cc
-#         codeclimate/codeclimate analyze -f html > ./codequality-results/index.html
-#   artifacts:
-#     paths:
-#       - codequality-results/
-#     reports:
-#       codequality: gl-code-quality-report.json
+code_quality_job:
+  stage: quality
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - mkdir codequality-results
+    - docker run
+        --env CODECLIMATE_CODE="$PWD"
+        --volume "$PWD":/code
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        --volume /tmp/cc:/tmp/cc
+        codeclimate/codeclimate analyze -f html > ./codequality-results/index.html
+  artifacts:
+    paths:
+      - codequality-results/
+    reports:
+      codequality: gl-code-quality-report.json
 
-# package_job:
-#   stage: package
-#   services:
-#     - docker:stable-dind
-#   variables:
-#     DOCKER_HOST: tcp://docker:2375
-#   script:
-#     - apk add --no-cache docker
-#     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-#     - ./mvnw install -PbuildDocker -DskipTests=true -DpushImage
-#       -Dhttps.protocols=TLSv1.2
-#       -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
-#       -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
-#       -Dorg.slf4j.simpleLogger.showDateTime=true
-#       -Djava.awt.headless=true
-#       --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
-#   image: openjdk:8-alpine
+package_job:
+  stage: package
+  services:
+    - docker:stable-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    - apk add --no-cache docker
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - ./mvnw install -PbuildDocker -DskipTests=true -DpushImage
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
 
 deploy_staging_job:
   stage: deploy
@@ -107,3 +108,31 @@ performance_job:
       - sitespeed-results/
     reports:
       performance: performance.json
+
+canary_job:
+  stage: canary
+  image: docker:stable
+  script:
+    - apk add --no-cache openssh-client py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
+    - pip install docker-compose
+    - export DOCKER_HOST=tcp://$PLAYWD.direct.labs.play-with-docker.com:2375
+    - docker-compose up -d
+  environment:
+    name: prod
+    url: http://$PLAYWD-8080.direct.labs.play-with-docker.com
+  when: manual
+  only:
+    - master
+
+deploy_prod_job:
+  stage: deploy
+  image: docker:stable
+  script:
+    - apk add --no-cache openssh-client py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
+    - pip install docker-compose
+    - export DOCKER_HOST=tcp://$PLAYWD.direct.labs.play-with-docker.com:2375
+    - docker-compose up -d
+  environment:
+    name: prod
+    url: http://$PLAYWD-8080.direct.labs.play-with-docker.com
+  when: manual
